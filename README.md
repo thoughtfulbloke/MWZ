@@ -1,28 +1,42 @@
 ---
 title: "MWZ station 10 HHZ exploratory analysis"
 author: "David Hood"
-date: "2023-05-11"
+date: "2023-05-23"
 output:
   html_document: 
     keep_md: yes
-  pdf_document: default
+    fig_caption: yes
+  pdf_document: 
+    fig_width: 6
+    fig_height: 3.5
   word_document: default
 ---
 
 
 
 
-Individual seismograph readings are being looked at to inform the discussion about the Geonet earthquake database having significantly more earthquakes at night.
 
-A particular, discussion focus was on the STA/LTA caluclation for determining likely earthquakes, where STA/LTA is
+This draft replaces the MAy 11th 2023 draft. It is a rewrite to add clarity and explanation about the steps used and reasons, but does not change the conclusions.
+
+## Motivation
+
+There are significantly more (56.09% of 100,279) earthquakes at night in the Geonet New Zealand earthquake catalogue.  While I have ruled out a number of explanations based on correlations between the catalog and other sources, I have been advised to check the seismograph readings themselves rather than the interpreted values.
+
+A particular, discussion focus was on the STA/LTA calculation for determining likely earthquakes, where STA/LTA is
 
 $$
 \frac{mean(squaredAmplitudeSamplesFromShortTermWindow)}{mean(squaredAmplitudeSamplesFromLongTermWindow)}
 $$
 
-With the unusual high signals of earthquake events being more dominant in the short term time window when compared to the long term time window where background noise is more dominant. If daytime noise is high enough it could be lowering the ratio (via raising the denominator in proportion to the numerator) enough to miss earthquakes give a similar rate of events in the day and night. If noise is not the cause then large signal readings should actually be occurring more frequently at night.
+With the unusual high signals of earthquake events being more dominant in the short term time window when compared to the long term time window where background noise is more dominant.
 
-Matawai/ MWZ is being looked at in detail, as the first seismograph considered (HAZ) showed a moving skew in the overall distribution through the day, and Matawai is near to an Electronic Weather Station that records hourly temperature for examining that phenomena. The two stations share the features of being located near to the East Cape, which has a very high proportion of recorded nighttime earthquakes, the seismographs recording more extreme events at night, and the seismograph showing a daily moving skew in the distribution of recorded entries.
+If daytime noise is high enough it could be lowering the ratio (via raising the denominator in proportion to the numerator) enough to miss earthquakes give a similar rate of events in the day and night.
+
+If raised noise is not the cause then large signal readings should actually be occurring more frequently at night. This acts as a test of the consistency of the noise explanation by testing what should be a predictable outcome of the noise explanation.
+
+## Matawai/ MWZ
+
+Matawai/ MWZ is being looked at in detail, as the first seismograph considered (HAZ) showed a moving skew in the overall distribution through the day (see Appendix 1), and Matawai is near to an Electronic Weather Station that records hourly temperature for examining that phenomena. The two stations share the features of being located near to the East Cape, which has a very high proportion of recorded nighttime earthquakes (58-60% compared to the national average of 56%), the seismographs recording more extreme events at night, and the seismograph showing a daily moving skew in the distribution of recorded entries.
 
 ## Specific Terms
 
@@ -39,11 +53,27 @@ Longitude: 177.528, Latitude: -38.334
 
 Data downloaded as 10 minute intervals from 2010-12-31 to 2021-06-01 (UTC timezone) with 79 days of data unavailable. With 100 samples per second, there are 32,023,172,557 readings in total. Of those readings 15,958,217,096 are in day, 16,064,955,461 at night (where day is on or above the horizon at the centre of the 10 minute interval). As there are 60,000 readings in a 10 minute period where the seismograph did not go off line, that is easily sufficient to establish accurate summary values for each 10 minute period. As there are around 52560 10 minute periods a year for a year of full operation, more than a decade's of readings gives a large number of independent 10 minute samples.
 
-As the number of entries in different analytical categories can vary, I am making heavy use of average values per 10 minute unit, since increasing the sample size increases the accuracy of the average value (in a Central Limit Theorem square root of the increase in sample kind if way)
+## Data processing
 
-For analysis of the size of amplitude movements away from the centre of the 10 minute range, to make the analysis tractable as an exploratory analysis on a standard laptop I binned the size of the movement into log10(x+1)/10 steps. So the smallest moves were in the 0-0.1 (0 to 1.2589 raw amplitude measure away from the median) range, and the largest moves in the data set were in the 6.8-6.9 (6309573 to 7943282 raw amplitude measure away from the median).
+A seismograph trace normally displays the amplitude readings over time (figure 01)
 
-This data has also been linked with the NIWA Motu electronic weather station (Longitude: 177.52941,Latitude: -38.28566) 5.3 km away to compare its hourly temperature readings for investigating skew. 87,832 readings are available on the hour for both the seismograph and thermometer.
+![MWZ 2010-12-31 14:20 to 14:25 UTC](MWZ_explore_files/figure-html/fg01-1.png)
+
+However, for a given number of entries, you can also express those entries by the frequency at which particular readings occur (figure 02).
+
+![Density plot of previous (fig 1) data](MWZ_explore_files/figure-html/fg02-1.png)
+
+This provides detail on the range of values in the given period. But as the centre of the distribution varies with daily temperate (Appendix 1), I am recentring the distribution on the median of the distribution. This avoids bias when comparing different times caused by the raw readings being centred at different distances from 0 at different times.
+
+It is customary to square the readings to produce a distance from the centre of the amplitude, but I am using the absolute value as I want to minimise the squaring effects on extreme values in aggregation steps.
+
+Among the 32 billion readings from this seismograph, the maximum values approach 7943282 amplitude away from the median. To make the amplitude distances tractable, I am converting to the base 10 log of the amplitude.
+
+To make the 32 billion readings easy to hold and analyse in memory, I am placing the log converted readings into binned 0.1 steps.
+
+As the number of entries in different bins and the number of day and night entries vary, I am making heavy use of average values per 10 minute unit, since increasing the sample size increases the accuracy of the average value (in a Central Limit Theorem square root of the increase in sample size kind if way). The trade off in using mean aggregates heavily is that if it is only a small subset of particular entries of interest, that specific combination is swamped by the overall aggregate.
+
+Seperately, this data has also been linked with the NIWA Motu electronic weather station (Longitude: 177.52941,Latitude: -38.28566) 5.3 km away to compare its hourly temperature readings for investigating skew. 87,832 readings are available on the hour for both the seismograph and thermometer.
 
 ## Sensor activity
 
@@ -51,34 +81,38 @@ This data has also been linked with the NIWA Motu electronic weather station (Lo
 
 For my original motivating interest, that there are more earthquakes in the catalogue that occur at night, I checked the number of extreme amplitude movements. Readings of that strength occur at an average rate per 10 minute period 24% higher in night than in day (6.52 per 60,000 readings at night vs. 5.26 per 60,000 readings in the day).
 
+For the purposes of influencing the STA/LTA caluclation for earthquakes, as the amplitude strength of this imbalance is far stronger than noise levels it has more effect on the STA than the LTA. This effect is not more noise raising the LTA during the day and effecting the threshold calculation.
+
 ## Noise
 
-While I avoided the effect of noise on the determination of an earthquake by only looking at extreme events, having this much data can say some things about noise (where noise is the replacement/ masking of quieter movements by higher strength sources of vibration up to the maximum level of noise production, mostly during the day).
+While I avoided the effect of noise on the determination of an earthquake by only looking at extreme events, having this much data can say some things about noise (where noise is the replacement/ masking of quieter movements by higher strength sources of vibration up to the maximum level of noise production, mostly assumed to be during the day).
 
-The aggregate pattern caused by increased noise is a lower readings of quiet (readings central to the distribution), higher levels of readings of noise in the range of the noise production, then unaffected above that. This means we can compared distributions at different times from the same site to gauge the relative effects of noise between those times.
+The aggregate pattern caused by increased noise is expected to be lower readings of quiet (readings central to the distribution), higher levels of readings of noise in the range of the noise production (which replace what would otherwise be lower readings), then unaffected above that. This means I can compared distributions at different times from the same site to gauge the relative effects of noise between those times (figure 3).
 
-![](MWZ_explore_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![Average count of readings per 10 minutes by distance (log10(Size of amplitude movement from median + 1)) from median](MWZ_explore_files/figure-html/fg03-1.png)
+
 The daytime and night range, and frequency of that range, is fairly similar, and while daytime events do occur at a higher rate up to 2.5 (moves of 10^2.5-10^2.6), nighttime events occur at a higher rate above that movement bin. Because this change over is close to the peak in the data, this means that, broadly, daytime events are more common among movements in the lower half of the data and nighttime events are more common among movements in the upper half (not just the upper 1/10,000th extreme values).
 
 This is not the expected pattern for noise under the assumption of the same distribution of day and night earthquakes. There, daytime noise is replacing quieter values with larger movements giving a pattern of nighttime dominance in the smallest ranges, followed by an artificial inflation of daytime values in the medium ranges, followed by a similar rate for both in the extreme ranges unaffected by noise.
 
-Because this is not the expected pattern, and the largest counts on the graphs have 1,000 times the smaller steps so it is hard to see the detail, I thought it worth exploring the imbalance at each individual step of amplitude distance relative to those movements in the alternative cycle, in order to better see the relative distances.
+Because this is not the expected pattern, and the largest amplitude counts on the graphs have 1,000 times the readings of less frequent steps so it is hard to see the detail, I thought it worth exploring the imbalance at each individual step of amplitude distance relative to those movements in the alternative cycle, in order to better see the relative distances (figure 4).
 
-![](MWZ_explore_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![Mean day event rate as percentage of mean night rate by distance (log10(Size of amplitude movement from median + 1)) from median. Events of 6.3 or higher removed due to sparseness](MWZ_explore_files/figure-html/fg04-1.png)
 
 View as the per amplitude bin difference, there is a rise in daytime events (following a period of night dominance at lower levels of activity) peaking at 4. If this is noise, then as the volume of data is reducing the rise is insufficient to account for the swing to night at low levels of activity (nor the continuing trend afterwards). However, if it is noise that un-masked would cause noise entries to otherwise be to the left of their measured position, that would create a steadier gradient in the progression to more extreme events at night.
 
-## The skew
+## Appendix 1, Skew and temperature.
 
-The entire distribution of recorded results moves through the day.
+When initially analysing data from the HAZ/Te Kaha seismograph, I noticed there was a diurnal and seasonal (but not weekly) move of the centre of the entire distribution. This differs from variation in the earthquake catalogue (which is diurnal, a small component of weekly, and not seasonal), but I thought needed to be investigated. 
 
-![](MWZ_explore_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+Checking MWZ/ Matawai it shows the same pattern (figure 5), and had a close by NIWA weather station.
 
-## Temperature
 
-With the suggestion that the skew is caused by temperature, I am plotting the same distribution of centres for those entries that have EWS temperature readings.
+![(a) Daily (UTC) and (b) Monthly mean of 10 minutes of readings. GAM line of best fit](MWZ_explore_files/figure-html/fg05-1.png)
 
-![](MWZ_explore_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+With the suggestion that the skew is caused by temperature, I am plotting the same distribution of centres for those entries that have EWS temperature readings taken at the same time as the seismograph readings.
+
+![Center (mean) of 10 minute observations by Air temperature.GAM line of best fit](MWZ_explore_files/figure-html/fg06-1.png)
 
 From that, it is absolutely clear that as the air temperature gets above 20 degrees the seismograph skews, and almost all of the above 20 degrees readings are in the day. So that is the reason, but the question open as to if the skew is influencing results.
 
