@@ -16,7 +16,7 @@ output:
 
 
 
-This draft replaces the MAy 11th 2023 draft. It is a rewrite to add clarity and explanation about the steps used and reasons, but does not change the conclusions.
+This draft replaces the May 11th 2023 draft. It is a rewrite to add clarity and explanation about the steps used and reasons, but does not change the conclusions.
 
 ## Motivation
 
